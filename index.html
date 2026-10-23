@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PoolSpan — Design &amp; price a pool (demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--b:#0a84c6;--b2:#13b5c8;--aqua:#e6f7fb;--bg:#f3f8fb;--ink:#0f2a3d;--mut:#5d7385;--line:#dde8ef;--ok:#14915a;--bad:#d1453b;--card:#fff;--r:18px;--sh:0 1px 2px rgba(15,42,61,.05),0 8px 24px rgba(15,42,61,.07)}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;font:16px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#e9f6fb 0,var(--bg) 320px);color:var(--ink);min-height:100vh}
+button{font:inherit}
+.top{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 18px;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.02em;cursor:pointer}
+.logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--b),var(--b2));display:inline-block;box-shadow:inset 0 -8px 0 rgba(255,255,255,.25)}
+.tmp{font-size:11px;font-weight:600;color:var(--mut);background:var(--aqua);border-radius:99px;padding:2px 8px}
+.modes{display:flex;gap:4px;background:#eef4f8;border-radius:99px;padding:4px;margin-left:auto}
+.modes button{border:0;background:transparent;padding:8px 14px;border-radius:99px;cursor:pointer;color:var(--mut);font-weight:600;font-size:14px;min-height:40px}
+.modes button.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.demo{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;color:#7a5a12;background:#fff8e6;border-bottom:1px solid #f3e3b5;padding:7px 12px;text-align:center}
+.demo b{font-weight:600}
+.wrap{max-width:1040px;margin:0 auto;padding:18px 16px 60px}
+.progress{height:8px;background:#e2edf3;border-radius:99px;overflow:hidden;margin:4px 0 10px}.progress div{height:100%;background:linear-gradient(90deg,var(--b),var(--b2));border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.steps button{border:0;background:#fff;padding:8px 12px;border-radius:99px;cursor:pointer;color:var(--mut);font-size:13px;font-weight:500;box-shadow:0 1px 2px rgba(15,42,61,.06);min-height:38px}
+.steps button.on{background:var(--ink);color:#fff}.steps button.done{color:var(--b)}
+.card{background:var(--card);border-radius:var(--r);padding:22px;margin-bottom:16px;box-shadow:var(--sh);border:1px solid rgba(221,232,239,.7)}
+section.card{animation:fade .35s ease}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--b)}
+h2{font-size:26px;letter-spacing:-.02em;margin:4px 0 6px;line-height:1.2}h3{margin:0 0 6px}
+.lead{color:var(--mut);margin:0 0 18px;font-size:16px}
+.row{display:flex;flex-wrap:wrap;gap:18px}.col{flex:1;min-width:260px}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+.hint{display:block;font-weight:400;color:var(--mut);font-size:13px;margin-top:2px}
+input,textarea,select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;background:#fbfdfe;transition:border .2s,box-shadow .2s;min-height:48px}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--b);box-shadow:0 0 0 4px rgba(10,132,198,.12)}
+textarea{min-height:150px;resize:vertical}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.grid3 .f span{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--b),#0b95c9);color:#fff;border:0;padding:14px 22px;border-radius:14px;cursor:pointer;margin:6px 8px 6px 0;font-weight:600;min-height:52px;box-shadow:0 6px 16px rgba(10,132,198,.25);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(10,132,198,.3)}.btn:active{transform:none}
+.btn.sec{background:#fff;color:var(--b);border:1.5px solid #cfe3ee;box-shadow:none}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:14px}
+.actions .btn:last-child{margin-left:auto}
+.mic{width:64px;height:64px;border-radius:50%;padding:0;font-size:26px}
+.mic.rec{background:var(--bad);animation:p 1.1s infinite}@keyframes p{50%{box-shadow:0 0 0 12px rgba(209,69,59,.15)}}
+.drop{border:2px dashed #cfe3ee;border-radius:14px;padding:18px;text-align:center;color:var(--mut);background:var(--aqua)}
+.drop input{min-height:0;border:0;background:transparent;padding:8px 0}
+canvas.draw{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;touch-action:none;cursor:crosshair;max-width:100%;height:auto;box-shadow:inset 0 0 0 1px #fff}
+.sample{display:inline-block;background:#fff3d6;color:#8a6200;font-weight:600;padding:2px 9px;border-radius:99px;font-size:12px;vertical-align:middle}
+.tablewrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line);margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-size:12px;color:var(--mut);font-weight:600;background:#f7fbfd}td input{width:70px;padding:6px;min-height:36px;text-align:right}tfoot td{font-weight:700;background:#f7fbfd}
+.cost{background:#fff9ec}.muted{color:var(--mut);font-size:13px}.ok{color:var(--ok);font-weight:600}.bad{color:var(--bad);font-weight:600}
+.banner{max-width:1040px;margin:12px auto 0;background:#e9f8ef;border:1px solid #bfe6cf;color:#0f5132;padding:12px 16px;border-radius:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.banner .btn{min-height:40px;padding:8px 14px;margin:0}
+#three{width:100%;height:440px;border-radius:14px;overflow:hidden;background:linear-gradient(#cfeaf7,#eaf6fb)}
+.contract{font-family:Georgia,serif;max-width:760px;line-height:1.7;background:#fffefb;border:1px solid var(--line);border-radius:14px;padding:22px}.contract h2{text-align:center;font-size:22px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}.legend span{font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1.5px solid var(--line);border-radius:99px;padding:10px 16px;cursor:pointer;user-select:none;font-size:15px;font-weight:500;background:#fff;transition:all .15s;min-height:44px}
+.chip.on{background:var(--b);color:#fff;border-color:var(--b)}
+.big{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.phone{max-width:430px;margin:0 auto}
+.price{background:linear-gradient(135deg,#0a84c6,#13b5c8);color:#fff;border-radius:var(--r);padding:18px 20px;margin-top:16px}.price .muted{color:rgba(255,255,255,.85)}.price .sample{background:rgba(255,255,255,.2);color:#fff}
+.empty{border:2px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--mut)}
+/* start screen */
+#start{max-width:880px;margin:0 auto;padding:40px 18px 60px;text-align:center;animation:fade .4s ease}
+#start h1{font-size:clamp(32px,6vw,52px);letter-spacing:-.03em;line-height:1.08;margin:10px 0 12px}
+#start h1 span{background:linear-gradient(90deg,var(--b),var(--b2));-webkit-background-clip:text;background-clip:text;color:transparent}
+#start p.sub{color:var(--mut);font-size:18px;max-width:560px;margin:0 auto 30px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;text-align:left}
+.choice{display:block;width:100%;text-align:left;font-family:inherit;border:0;background:#fff;border-radius:22px;padding:26px;cursor:pointer;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s;color:var(--ink)}
+.choice:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(15,42,61,.12)}
+.choice .ic{font-size:34px;width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:var(--aqua);margin-bottom:14px}
+.choice b{display:block;font-size:22px;margin-bottom:4px}.choice span{display:block;color:var(--mut)}
+.choice .go{display:block;margin-top:14px;color:var(--b);font-weight:600}
+.how{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:28px}.how div{background:#fff;border-radius:99px;padding:8px 14px;font-size:14px;color:var(--mut);box-shadow:0 1px 2px rgba(15,42,61,.06)}
+@media(max-width:640px){.top{padding:10px 12px}.logo{font-size:18px}.tmp{display:none}.modes{margin-left:auto}.modes button{padding:6px 10px;font-size:13px;min-height:36px}.top{flex-wrap:nowrap;gap:6px}#reset{padding:6px 10px!important;min-height:36px!important;font-size:13px}
+ .wrap{padding:12px 10px 50px}.card{padding:16px;border-radius:16px}h2{font-size:22px}#three{height:320px}
+ .actions .btn{flex:1 1 100%;margin:4px 0}.actions .btn:last-child{margin-left:0}.steps{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.steps button{flex:0 0 auto}}
+@media print{.top,.demo,.steps,.progress,.actions{display:none}}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<header class="top"><div class="logo" id="home" title="Start over"><i></i>PoolSpan</div><span class="tmp">working name</span>
+<div class="modes" id="modes" style="display:none"><button id="mH">Homeowner</button><button id="mB" class="on">Builder</button></div>
+<button class="btn sec" id="reset" style="min-height:40px;padding:8px 14px;margin:0">Reset</button></header>
+<div class="demo">💧 <b>Demo version.</b> All prices are sample numbers, not real Savage Pools costs. Your changes save on this device.</div>
+<div id="syncBanner" class="banner" style="display:none"></div>
+
+<div id="start">
+ <div class="kicker">Pool design made simple</div>
+ <h1>Dream up your pool.<br><span>See it, price it, build it.</span></h1>
+ <p class="sub">Sketch a pool with your finger, and PoolSpan turns it into a real design that fits your yard, with a 3D view and an estimate.</p>
+ <div class="choices">
+  <button class="choice" id="goHO"><div class="ic">🏡</div><b>I'm a homeowner</b><span>Doodle the pool you want and pick fun extras. Takes about 2 minutes.</span><div class="go">Start designing →</div></button>
+  <button class="choice" id="goB"><div class="ic">🛠️</div><b>I'm a builder</b><span>Meet the client, clean up the design, see it in 3D, and build the bid.</span><div class="go">Open builder tools →</div></button>
+ </div>
+ <div class="how"><div>✏️ Sketch</div><div>📐 Fit to yard</div><div>🧊 3D view</div><div>💲 Price</div><div>📝 Contract</div></div>
+</div>
+
+<div id="builder" style="display:none"><div class="wrap">
+<div class="progress"><div id="prog"></div></div>
+<nav class="steps" id="steps"></nav>
+
+<section data-step="0" class="card"><div class="kicker">Step 1 · Meet the homeowner</div><h2>Get to know the project</h2><p class="lead">Jot down who it's for and what they want. Upload their property survey if you have it.</p>
+<div class="row"><div class="col">
+ <label>Homeowner name</label><input id="hoName" value="Sample Homeowner">
+ <label>Property address</label><input id="hoAddr" value="123 Example Ln, Katy, TX">
+ <label>Property survey <span class="hint">The official drawing of the lot lines. PDF or photo is fine.</span></label>
+ <div class="drop" id="drop">📄 Add the survey file<br><input type="file" id="survey" accept=".pdf,image/*"><div id="surveyStat" class="muted">No file? No problem. We've loaded a sample 70 × 120 ft lot.</div></div>
+ <label>Yard measurements <span class="hint">Setbacks are how far the pool must stay from property lines and the house. An easement is a strip reserved for utilities: no digging there.</span></label>
+ <div class="grid3">
+  <div class="f"><span>Lot width (ft)</span><input id="lotW" type="number" value="70"></div>
+  <div class="f"><span>Lot depth (ft)</span><input id="lotD" type="number" value="120"></div>
+  <div class="f"><span>Side setback (ft)</span><input id="sbSide" type="number" value="5"></div>
+  <div class="f"><span>Back setback (ft)</span><input id="sbRear" type="number" value="8"></div>
+  <div class="f"><span>From house (ft)</span><input id="sbHouse" type="number" value="5"></div>
+  <div class="f"><span>Utility strip (ft)</span><input id="esmt" type="number" value="10"></div>
+ </div></div>
+ <div class="col"><label>Meeting notes <span class="hint">Tap the mic to record the conversation. We'll turn it into tidy notes.</span></label>
+ <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><button class="btn mic" id="mic" title="Record">🎤</button><span id="micStat" class="muted">Tap to start recording (demo)</span></div>
+ <textarea id="notes" placeholder="Budget, style, must-haves, worries…"></textarea></div></div>
+<div class="actions"><button class="btn" onclick="go(1)">Next: sketch the pool →</button></div></section>
+
+<section data-step="1" class="card"><div class="kicker">Step 2 · Sketch</div><h2>Draw the pool shape</h2><p class="lead">Use your finger or mouse to draw a rough outline. It doesn't need to be neat; we'll tidy it up. The green box is where a pool is allowed.</p>
+<canvas id="sk" class="draw" width="420" height="680"></canvas>
+<div class="actions"><button class="btn sec" id="skClear">Clear</button><button class="btn sec" id="skLoadHO">Use homeowner's drawing</button><button class="btn" id="toClean">Tidy it up →</button></div></section>
+
+<section data-step="2" class="card"><div class="kicker">Step 3 · Fit to the yard</div><h2>Your pool, cleaned up</h2><p class="lead">We smoothed your sketch and moved it so it stays clear of property lines, the house, and the utility strip.</p><div class="row">
+<div class="col"><canvas id="cl" class="draw" width="420" height="680"></canvas>
+<div class="legend"><span style="color:#999">┄ your sketch</span><span style="color:var(--b)">■ clean pool</span><span style="color:var(--bad)">┅ keep-away lines</span><span style="color:#b07">▨ utility strip</span><span style="color:var(--ok)">▭ allowed area</span></div></div>
+<div class="col"><label>Pool style <span class="hint">Leave on "Pick for me" and we'll choose.</span></label><select id="tpl"><option value="auto">Pick for me</option><option value="rectangle">Rectangle</option><option value="freeform">Curvy (freeform)</option></select>
+<label>Depth: shallow end and deep end (ft)</label><div class="grid3"><input id="d1" type="number" value="3.5" step=".5"><input id="d2" type="number" value="6" step=".5"></div>
+<div id="report" class="card" style="margin-top:14px;box-shadow:none;background:#f7fbfd"></div>
+<div class="actions"><button class="btn" id="to3d">See it in 3D →</button></div></div></div></section>
+
+<section data-step="3" class="card"><div class="kicker">Step 4 · 3D view</div><h2>Take a look around</h2><p class="lead">Drag to spin the yard, pinch or scroll to zoom. This is a quick preview, not a final rendering.</p><div id="three"></div>
+<div class="actions"><button class="btn" id="toBid">Price it →</button></div></section>
+
+<section data-step="4" class="card"><div class="kicker">Step 5 · Price</div><h2>Build the bid <span class="sample">Sample prices</span></h2><p class="lead">Materials are measured from the design and priced from a sample price list. Shaded columns are your costs: the homeowner never sees them.</p>
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px"><div style="width:160px"><label style="margin-top:0">Your markup %</label><input id="gm" type="number" value="25"></div><button class="btn sec" id="applyGm" style="margin:0">Apply to every line</button></div>
+<div class="tablewrap"><table id="bid"></table></div>
+<div class="actions"><button class="btn sec" id="publish">Send price to homeowner</button><span id="pubStat" class="muted"></span><button class="btn" id="toContract">Draft the contract →</button></div></section>
+
+<section data-step="5" class="card"><div class="kicker">Step 6 · Contract</div><h2>Draft contract</h2><p class="lead">Filled in automatically from the design and price. Review it before sharing.</p><div id="contract" class="contract"></div>
+<div class="actions"><button class="btn sec" onclick="window.print()">Print or save PDF</button><button class="btn" onclick="go(6)">Open materials calculator →</button></div></section>
+
+<section data-step="6" class="card"><div class="kicker">Extra · Materials calculator</div><h2>How much material?</h2><p class="lead">Enter a rectangle pool's size to see water, steel, and concrete amounts. Assumes a smooth slope, steel bars every 8 inches both ways, and a 1 ft thick shell.</p>
+<div class="grid3">
+ <div class="f"><span>Length (ft)</span><input id="tL" type="number" value="32"></div><div class="f"><span>Width (ft)</span><input id="tW" type="number" value="17"></div>
+ <div class="f"><span>Shallow end (ft)</span><input id="tS" type="number" value="3.5" step=".5"></div><div class="f"><span>Deep end (ft)</span><input id="tD" type="number" value="8" step=".5"></div>
+ <div class="f"><span>Steel overlap %</span><input id="tO" type="number" value="10"></div><div class="f"><span>Concrete $/cu yd (sample)</span><input id="tP" type="number" value="250"></div></div>
+<div class="tablewrap"><table id="tk"></table></div></section>
+</div></div>
+
+<div id="homeowner" style="display:none"><div class="wrap"><div class="phone">
+<section class="card"><div class="kicker">Your pool idea</div><h2>Design your pool</h2><p class="lead" style="margin-bottom:12px">Draw a shape with your finger. The green area shows where a pool can go in your yard.</p>
+<canvas id="ho" class="draw" width="350" height="420" style="width:100%"></canvas>
+<div class="actions" style="margin-top:8px"><button class="btn sec" id="hoClear">Start over</button></div>
+<label>Add extras <span class="hint">Tap to add or remove.</span></label><div class="chips" id="chips"></div>
+<label>Anything else? <span class="hint">A note for your builder.</span></label><input id="hoComment" placeholder="e.g. a shady spot on the sun shelf">
+<div class="price"><div class="muted">Estimated price <span class="sample">Sample</span></div><div class="big" id="hoEst">—</div><div class="muted" id="hoEstNote"></div></div>
+<button class="btn" id="hoSave" style="width:100%;margin-top:16px">Send my design to the builder</button><div id="hoStat" class="muted" style="text-align:center"></div>
+</section></div></div></div>
+
+<script type="module">
+// ===== Simulated backend (localStorage). In production these are server tables. =====
+const K={record:'poolspan.record',priv:'poolspan.builder_private',pub:'poolspan.public_rates'};
+// SAMPLE price list — stands in for the builder's Excel workbook. NOT real Savage Pools costs.
+const SAMPLE_PRICEBOOK=[
+ {code:'EXC',desc:'Excavation & haul-off',unit:'cy',cost:55,qty:d=>d.vol_cy},
+ {code:'SHELL',desc:'Steel + shotcrete shell',unit:'sf',cost:62,qty:d=>d.area},
+ {code:'PLUMB',desc:'Plumbing & electrical rough-in',unit:'ls',cost:9800,qty:()=>1},
+ {code:'TILE',desc:'Waterline tile',unit:'lf',cost:38,qty:d=>d.perim},
+ {code:'COPING',desc:'Coping',unit:'lf',cost:45,qty:d=>d.perim},
+ {code:'PLASTER',desc:'Interior finish (pebble)',unit:'sf',cost:14,qty:d=>d.surf},
+ {code:'DECK',desc:'Deck (4 ft band)',unit:'sf',cost:12,qty:d=>d.deck},
+ {code:'EQUIP',desc:'Equipment package',unit:'ls',cost:8200,qty:()=>1},
+ {code:'SPA',desc:'Attached spa',unit:'ea',cost:14000,qty:d=>d.f.SPA?1:0,feat:'SPA'},
+ {code:'LEDGE',desc:'Tanning ledge',unit:'ea',cost:3200,qty:d=>d.f.LEDGE?1:0,feat:'LEDGE'},
+ {code:'LED',desc:'LED lights',unit:'ea',cost:650,qty:d=>d.f.LED?3:0,feat:'LED'},
+ {code:'BUBB',desc:'Bubblers',unit:'ea',cost:900,qty:d=>d.f.BUBB?2:0,feat:'BUBB'},
+ {code:'HEAT',desc:'Gas heater',unit:'ea',cost:4200,qty:d=>d.f.HEAT?1:0,feat:'HEAT'},
+ {code:'FIRE',desc:'Fire bowls (pair)',unit:'ea',cost:3800,qty:d=>d.f.FIRE?1:0,feat:'FIRE'},
+ {code:'PERMIT',desc:'Permits, engineering',unit:'ls',cost:2600,qty:()=>1},
+];
+const FEATS=[['SPA','Spa'],['LEDGE','Tanning ledge'],['LED','LED lights'],['BUBB','Bubblers'],['HEAT','Heater'],['FIRE','Fire bowls']];
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+function initStores(){
+ if(!localStorage.getItem(K.priv)){save(K.priv,{markup:Object.fromEntries(SAMPLE_PRICEBOOK.map(p=>[p.code,25]))});}
+ if(!localStorage.getItem(K.record)){save(K.record,{version:0,homeowner:{name:'Sample Homeowner'},design:{strokes:[],features:{SPA:true,LED:true},author:'builder'},quote:null,events:[]});}
+ publishRates();
+}
+// "Server function": computes retail per unit = cost*(1+markup). Only the RESULT is written to the public store.
+function publishRates(){const pv=load(K.priv,{});const r={};SAMPLE_PRICEBOOK.forEach(p=>r[p.code]=Math.round(p.cost*(1+(pv.markup?.[p.code]??25)/100)*100)/100);save(K.pub,{rates:r,asOf:new Date().toISOString()});}
+function writeRecord(mut,actor){const r=load(K.record,{});mut(r);r.version=(r.version||0)+1;r.updatedBy=actor;r.updatedAt=new Date().toISOString();r.events=[...(r.events||[]).slice(-20),{v:r.version,actor,at:r.updatedAt}];save(K.record,r);return r;}
+initStores();
+
+// ===== Geometry =====
+const S=5; // px per ft (builder canvases)
+const L=()=>({W:+lotW.value,D:+lotD.value,side:+sbSide.value,rear:+sbRear.value,house:+sbHouse.value,es:+esmt.value});
+function buildable(l){ // lot: y=0 rear line, house occupies y in [0.58D, 0.96D] x in [10,W-10]
+ const houseY=Math.round(l.D*0.58);return {x0:l.side,x1:l.W-l.side,y0:Math.max(l.rear,l.es),y1:houseY-l.house,houseY};}
+function drawLot(ctx,s,l,ox=10,oy=10){const b=buildable(l);ctx.save();ctx.translate(ox,oy);
+ ctx.fillStyle='#eef6e8';ctx.fillRect(0,0,l.W*s,l.D*s);ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(0,0,l.W*s,l.D*s);
+ ctx.fillStyle='#ddd';ctx.fillRect(10*s,b.houseY*s,(l.W-20)*s,(l.D*0.38)*s);ctx.fillStyle='#555';ctx.font='12px sans-serif';ctx.fillText('HOUSE',(l.W/2-4)*s,(b.houseY+8)*s);
+ // easement hatch
+ ctx.save();ctx.beginPath();ctx.rect(0,0,l.W*s,l.es*s);ctx.clip();ctx.strokeStyle='#b07';ctx.lineWidth=1;for(let i=-l.D*s;i<l.W*s;i+=8){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+l.es*s,l.es*s);ctx.stroke();}ctx.restore();
+ ctx.fillStyle='#b07';ctx.fillText(`Utility easement ${l.es} ft`,4,l.es*s-3);
+ ctx.setLineDash([6,4]);ctx.strokeStyle='#c0392b';ctx.lineWidth=1.2;
+ [[l.side*s,0,l.side*s,l.D*s],[(l.W-l.side)*s,0,(l.W-l.side)*s,l.D*s],[0,l.rear*s,l.W*s,l.rear*s],[0,(b.houseY-l.house)*s,l.W*s,(b.houseY-l.house)*s]].forEach(a=>{ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(a[2],a[3]);ctx.stroke();});
+ ctx.setLineDash([]);ctx.strokeStyle='#1d8a4e';ctx.lineWidth=2;ctx.strokeRect(b.x0*s,b.y0*s,(b.x1-b.x0)*s,(b.y1-b.y0)*s);
+ ctx.fillStyle='#c0392b';ctx.fillText(`side ${l.side}′`,(l.side+.5)*s,(l.D*0.3)*s);ctx.fillText(`house setback ${l.house}′`,(l.side+1)*s,(b.y1-1)*s);
+ ctx.fillStyle='#666';ctx.fillText(`Lot ${l.W}′ × ${l.D}′ (rear line at top)`,2,l.D*s-4);ctx.restore();return b;}
+const bbox=pts=>{let a=[1e9,1e9,-1e9,-1e9];pts.forEach(([x,y])=>{a[0]=Math.min(a[0],x);a[1]=Math.min(a[1],y);a[2]=Math.max(a[2],x);a[3]=Math.max(a[3],y)});return a};
+function polyArea(p){let s=0;for(let i=0;i<p.length;i++){const[a,b]=p[i],[c,d]=p[(i+1)%p.length];s+=a*d-c*b}return Math.abs(s/2)}
+function perim(p){let s=0;for(let i=0;i<p.length;i++){const[a,b]=p[i],[c,d]=p[(i+1)%p.length];s+=Math.hypot(c-a,d-b)}return s}
+function resample(p,n){const out=[];const tot=perim(p);const step=tot/n;let acc=0,i=0;out.push(p[0]);let prev=p[0];let segI=1;let need=step;
+ const pts=[...p,p[0]];for(let k=1;k<pts.length;k++){let a=prev,b=pts[k];let d=Math.hypot(b[0]-a[0],b[1]-a[1]);while(d>=need&&out.length<n){const t=need/d;const q=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];out.push(q);a=q;d=Math.hypot(b[0]-a[0],b[1]-a[1]);need=step}need-=d;prev=b}return out}
+function chaikin(p,it=3){for(let k=0;k<it;k++){const o=[];for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];o.push([.75*a[0]+.25*b[0],.75*a[1]+.25*b[1]],[.25*a[0]+.75*b[0],.25*a[1]+.75*b[1]])}p=o}return p}
+// Cleanup: strokes in ft coords -> clean polygon snapped inside buildable rect (1 ft margin)
+function cleanup(strokes,l,tplPref){const pts=strokes.flat();if(pts.length<5)return null;const b=buildable(l);const bb=bbox(pts);
+ const fill=polyArea(pts)/Math.max(1,(bb[2]-bb[0])*(bb[3]-bb[1]));const tpl=tplPref==='auto'?(fill>0.82?'rectangle':'freeform'):tplPref;
+ let poly=tpl==='rectangle'?[[bb[0],bb[1]],[bb[2],bb[1]],[bb[2],bb[3]],[bb[0],bb[3]]]:chaikin(resample(pts,24),3);
+ const viol=[];const m=1,ax0=b.x0+m,ax1=b.x1-m,ay0=b.y0+m,ay1=b.y1-m;
+ if(bb[0]<b.x0||bb[2]>b.x1)viol.push('Crosses side setback');if(bb[1]<l.es)viol.push('Encroaches utility easement');else if(bb[1]<l.rear)viol.push('Crosses rear setback');if(bb[3]>b.y1)viol.push('Too close to house');
+ let w=bb[2]-bb[0],h=bb[3]-bb[1];let sc=Math.min(1,(ax1-ax0)/w,(ay1-ay0)/h);if(sc<1)viol.push(`Scaled to ${(sc*100).toFixed(0)}% to fit buildable area`);
+ const cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2;poly=poly.map(([x,y])=>[cx+(x-cx)*sc,cy+(y-cy)*sc]);
+ let nb=bbox(poly),dx=0,dy=0;if(nb[0]<ax0)dx=ax0-nb[0];if(nb[2]>ax1)dx=ax1-nb[2];if(nb[1]<ay0)dy=ay0-nb[1];if(nb[3]>ay1)dy=ay1-nb[3];
+ poly=poly.map(([x,y])=>[Math.round((x+dx)*2)/2,Math.round((y+dy)*2)/2]);nb=bbox(poly);
+ return {tpl,poly,viol,snapped:viol.length>0,len:+(nb[3]-nb[1]).toFixed(1),wid:+(nb[2]-nb[0]).toFixed(1),area:+polyArea(poly).toFixed(0),perim:+perim(poly).toFixed(0)};}
+
+// ===== Builder UI =====
+const STEPS=['Meet','Sketch','Fit to yard','3D view','Price','Contract','Calculator'];
+let step=0;const stepsEl=document.getElementById('steps');
+function go(i){step=i;stepsEl.innerHTML='';STEPS.forEach((s,j)=>{const b=document.createElement('button');b.textContent=(j<6?(j+1)+'. ':'')+s;b.className=j===i?'on':(j<i?'done':'');b.onclick=()=>go(j);stepsEl.appendChild(b)});
+ prog.style.width=Math.round((Math.min(i,5)+1)/6*100)+'%';window.scrollTo({top:0,behavior:'smooth'});document.querySelectorAll('[data-step]').forEach(e=>e.style.display=+e.dataset.step===i?'block':'none');
+ if(i===1)drawSketch();if(i===2)runClean();if(i===3)render3d();if(i===4)renderBid();if(i===5)renderContract();if(i===6)takeoff();}
+window.go=go;
+let strokes=load(K.record,{}).design?.strokes||[];let clean=null;
+// mic mock
+const SAMPLE_TX='[Sample transcript] Homeowner wants a freeform pool with a tanning ledge and attached spa, budget around ninety thousand, kids are 6 and 9, worried about the drainage easement at the back fence, likes travertine.';
+mic.onclick=()=>{if(mic.classList.contains('rec')){mic.classList.remove('rec');micStat.textContent='Transcribing (mock)…';setTimeout(()=>{notes.value+=(notes.value?'\n\n':'')+SAMPLE_TX+'\n\nAI summary (mock):\n• Style: freeform, travertine\n• Features: tanning ledge, attached spa\n• Budget: ~$90k (stated)\n• Concerns: rear easement, kid safety (barrier)\n• Follow-up: confirm easement width on survey';micStat.textContent='Done. Inserted sample transcript + summary.'},700)}else{mic.classList.add('rec');micStat.textContent='Recording… tap again to stop (mock, no audio captured)'}};
+survey.onchange=e=>{const f=e.target.files[0];if(f)surveyStat.innerHTML=`Uploaded <b>${f.name}</b> (${(f.size/1024).toFixed(0)} KB). Mock parse: lot 70×120 ft, 10 ft rear utility easement, setbacks 5/8/5 ft. <span class="ok">Please confirm below.</span>`};
+// sketch
+const sk=document.getElementById('sk'),sx=sk.getContext('2d');
+function drawSketch(){sx.clearRect(0,0,sk.width,sk.height);drawLot(sx,S,L());sx.strokeStyle='#0e6ba8';sx.lineWidth=2.5;strokes.forEach(st=>{sx.beginPath();st.forEach(([x,y],i)=>{const X=10+x*S,Y=10+y*S;i?sx.lineTo(X,Y):sx.moveTo(X,Y)});sx.stroke()})}
+function pen(cv,toFt,onEnd,redraw){let cur=null;const pos=e=>{const r=cv.getBoundingClientRect();return toFt((e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height)};
+ cv.onpointerdown=e=>{cur=[pos(e)];onEnd('start',cur);cv.setPointerCapture(e.pointerId)};cv.onpointermove=e=>{if(cur){cur.push(pos(e));redraw()}};cv.onpointerup=()=>{if(cur){onEnd('end',cur);cur=null}}}
+pen(sk,(x,y)=>[(x-10)/S,(y-10)/S],(t,c)=>{if(t==='start')strokes.push(c)},drawSketch);
+skClear.onclick=()=>{strokes=[];drawSketch()};
+skLoadHO.onclick=()=>{const r=load(K.record,{});strokes=JSON.parse(JSON.stringify(r.design?.strokes||[]));drawSketch()};
+toClean.onclick=()=>go(2);
+// cleanup
+const cl=document.getElementById('cl'),cx2=cl.getContext('2d');
+function runClean(){cx2.clearRect(0,0,cl.width,cl.height);drawLot(cx2,S,L());cx2.strokeStyle='#999';cx2.setLineDash([3,3]);cx2.lineWidth=1.5;strokes.forEach(st=>{cx2.beginPath();st.forEach(([x,y],i)=>i?cx2.lineTo(10+x*S,10+y*S):cx2.moveTo(10+x*S,10+y*S));cx2.stroke()});cx2.setLineDash([]);
+ clean=cleanup(strokes,L(),tpl.value);if(!clean){report.innerHTML='<div class="empty">✏️ No sketch yet. Go back a step and draw a shape, or use the homeowner\'s drawing.</div>';return}
+ cx2.fillStyle='rgba(14,107,168,.45)';cx2.strokeStyle='#0e6ba8';cx2.lineWidth=2.5;cx2.beginPath();clean.poly.forEach(([x,y],i)=>i?cx2.lineTo(10+x*S,10+y*S):cx2.moveTo(10+x*S,10+y*S));cx2.closePath();cx2.fill();cx2.stroke();
+ const nice={rectangle:'Rectangle',freeform:'Curvy (freeform)'}[clean.tpl]||clean.tpl;
+ report.innerHTML=`<div class="ok" style="font-size:17px">✓ Fits in the allowed area</div><div style="margin:8px 0"><b>${nice}</b> · about ${clean.wid} × ${clean.len} ft · ${clean.area} sq ft of water</div>`+(clean.viol.length?'<div class="muted" style="margin-bottom:4px">What we fixed for you:</div><ul style="margin:0;padding-left:18px">'+clean.viol.map(v=>`<li>${v.replace('Crosses side setback','Was too close to the side fence').replace('Encroaches utility easement','Was over the utility strip').replace('Crosses rear setback','Was too close to the back fence').replace('Too close to house','Was too close to the house').replace(/Scaled to (\d+)% to fit buildable area/,'Shrunk a little ($1% size) to fit')} → moved inside</li>`).join('')+'</ul>':'<div class="muted">Your sketch already fit. Nice!</div>');}
+tpl.onchange=runClean;to3d.onclick=()=>go(3);
+// 3D
+let three=null;
+async function render3d(){if(!clean){runClean();if(!clean)return}const el=document.getElementById('three');
+ try{const THREE=await import('three');const {OrbitControls}=await import('three/addons/controls/OrbitControls.js');
+ if(!three){const r=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});r.setSize(el.clientWidth,440);el.innerHTML='';el.appendChild(r.domElement);const sc=new THREE.Scene();sc.background=new THREE.Color(0xcfe3f2);
+  const cam=new THREE.PerspectiveCamera(45,el.clientWidth/440,.1,1000);const ctl=new OrbitControls(cam,r.domElement);sc.add(new THREE.HemisphereLight(0xffffff,0x667755,1.1));const dl=new THREE.DirectionalLight(0xffffff,1.2);dl.position.set(40,80,30);sc.add(dl);
+  three={THREE,r,sc,cam,ctl,grp:null};const loop=()=>{requestAnimationFrame(loop);ctl.update();r.render(sc,cam)};loop();}
+ const {sc,cam,ctl}=three;if(three.grp)sc.remove(three.grp);const g=new THREE.Group();three.grp=g;sc.add(g);const l=L(),b=buildable(l);
+ const lot=new THREE.Mesh(new THREE.PlaneGeometry(l.W,l.D),new THREE.MeshLambertMaterial({color:0x7fae5a}));lot.rotation.x=-Math.PI/2;lot.position.set(l.W/2,0,l.D/2);g.add(lot);
+ const house=new THREE.Mesh(new THREE.BoxGeometry(l.W-20,12,l.D*.38),new THREE.MeshLambertMaterial({color:0xd8cdb8}));house.position.set(l.W/2,6,b.houseY+l.D*.19);g.add(house);
+ const es=new THREE.Mesh(new THREE.PlaneGeometry(l.W,l.es),new THREE.MeshBasicMaterial({color:0xbb0077,transparent:true,opacity:.35}));es.rotation.x=-Math.PI/2;es.position.set(l.W/2,.05,l.es/2);g.add(es);
+ const shp=new THREE.Shape(clean.poly.map(([x,y])=>new THREE.Vector2(x,-y)));const d1v=+d1.value,d2v=+d2.value;
+ // deck band
+ const deck=new THREE.Mesh(new THREE.ExtrudeGeometry(shp,{depth:.3,bevelEnabled:true,bevelThickness:0,bevelSize:4,bevelSegments:1}),new THREE.MeshLambertMaterial({color:0xe9dcc3}));deck.rotation.x=-Math.PI/2;deck.position.y=-.25;g.add(deck);
+ const shell=new THREE.Mesh(new THREE.ExtrudeGeometry(shp,{depth:d2v,bevelEnabled:false}),new THREE.MeshLambertMaterial({color:0x2a8fd0,side:THREE.DoubleSide}));shell.rotation.x=-Math.PI/2;shell.position.y=-d2v+.1;g.add(shell);
+ const water=new THREE.Mesh(new THREE.ShapeGeometry(shp),new THREE.MeshPhongMaterial({color:0x5fc8f0,transparent:true,opacity:.85,shininess:90}));water.rotation.x=-Math.PI/2;water.position.y=.12;g.add(water);
+ const bb=bbox(clean.poly);const c=[(bb[0]+bb[2])/2,(bb[1]+bb[3])/2];cam.position.set(c[0]+35,40,c[1]-45);ctl.target.set(c[0],0,c[1]);
+ }catch(e){el.innerHTML='<p style="padding:20px">3D needs three.js from the CDN (offline?): '+e.message+'</p>'}}
+toBid.onclick=()=>go(4);
+// bid
+function qtys(){const c=clean||cleanup(strokes,L(),'auto');const r=load(K.record,{});const f=r.design?.features||{};if(!c)return null;const avgD=(+d1.value+ +d2.value)/2;
+ return {area:c.area,perim:c.perim,vol_cy:Math.round(c.area*(avgD+1)/27),surf:Math.round(c.area+c.perim*avgD),deck:Math.round(c.perim*4+16*4),f};}
+function renderBid(){const q=qtys();const t=document.getElementById('bid');if(!q){t.innerHTML='<tr><td>No design yet.</td></tr>';return}const pv=load(K.priv,{markup:{}});let tc=0,tr=0;
+ let h='<thead><tr><th>Line (SAMPLE price list)</th><th>Qty</th><th>Unit</th><th class="cost">Unit cost</th><th class="cost">Ext. cost</th><th class="cost">Markup %</th><th>Retail</th></tr></thead><tbody>';
+ SAMPLE_PRICEBOOK.forEach(p=>{const n=p.qty(q);if(!n)return;const ec=n*p.cost,mk=pv.markup[p.code]??25,rt=ec*(1+mk/100);tc+=ec;tr+=rt;
+  h+=`<tr><td>${p.desc}</td><td>${n}</td><td>${p.unit}</td><td class="cost">${$(p.cost)}</td><td class="cost">${$(ec)}</td><td class="cost"><input data-mk="${p.code}" type="number" value="${mk}"></td><td>${$(rt)}</td></tr>`});
+ h+=`</tbody><tfoot><tr><td>Total</td><td></td><td></td><td class="cost"></td><td class="cost">${$(tc)}</td><td class="cost">${((tr/tc-1)*100).toFixed(1)}% avg · margin ${((1-tc/tr)*100).toFixed(1)}%</td><td>${$(tr)}</td></tr></tfoot>`;t.innerHTML=h;
+ t.querySelectorAll('[data-mk]').forEach(i=>i.onchange=()=>{const v=load(K.priv,{markup:{}});v.markup[i.dataset.mk]=+i.value;save(K.priv,v);publishRates();renderBid()});window._bid={tc,tr};}
+const $=n=>'$'+Math.round(n).toLocaleString();
+applyGm.onclick=()=>{const v=load(K.priv,{markup:{}});SAMPLE_PRICEBOOK.forEach(p=>v.markup[p.code]=+gm.value);save(K.priv,v);publishRates();renderBid()};
+publish.onclick=()=>{const q=qtys();const pub=load(K.pub,{}).rates;const lines=SAMPLE_PRICEBOOK.map(p=>({label:p.desc,qty:p.qty(q),amt:p.qty(q)*pub[p.code]})).filter(x=>x.qty);
+ const tot=lines.reduce((s,x)=>s+x.amt,0);writeRecord(r=>{r.quote={kind:'firm_bid',retail_total:Math.round(tot),retail_lines:lines.map(x=>({label:x.label,retail_amount:Math.round(x.amt)})),note:'SAMPLE DATA'};r.cleanDesign=clean},'builder');pubStat.textContent=`Published retail ${$(tot)} (no cost fields) at v${load(K.record).version}.`};
+toContract.onclick=()=>go(5);
+function renderContract(){if(!window._bid)renderBid();const tr=window._bid?.tr||0;const c=clean||{};const f=load(K.record,{}).design?.features||{};const today=new Date().toLocaleDateString();
+ const sched=[['Deposit at signing',10],['Excavation complete',25],['Shell (shotcrete) complete',30],['Tile & coping complete',20],['Final / start-up',15]];
+ contract.innerHTML=`<p class="sample">DRAFT — SAMPLE DATA — template not attorney-reviewed</p><h2>Swimming Pool Construction Agreement</h2>
+ <p>This Agreement is made ${today} between <b>Savage Pools</b> ("Contractor") and <b>${hoName.value}</b> ("Owner") for work at <b>${hoAddr.value}</b>.</p>
+ <h3>1. Scope of Work</h3><p>Construct one ${c.tpl||'custom'} gunite swimming pool, approx. ${c.wid||'—'}′ × ${c.len||'—'}′ (${c.area||'—'} sf surface, ${c.perim||'—'} lf perimeter), depth ${d1.value}′–${d2.value}′, located wholly within the buildable area shown on the attached site plan, outside all recorded easements and setbacks${Object.keys(f).filter(k=>f[k]).length?', including: '+FEATS.filter(([k])=>f[k]).map(x=>x[1].toLowerCase()).join(', '):''}.</p>
+ <h3>2. Contract Price</h3><p>Owner agrees to pay <b>${$(tr)}</b> (SAMPLE), subject to approved change orders.</p>
+ <h3>3. Payment Schedule</h3><table>${sched.map(([m,p])=>`<tr><td>${m}</td><td>${p}%</td><td>${$(tr*p/100)}</td></tr>`).join('')}</table>
+ <h3>4. Exclusions</h3><p>Rock removal, dewatering beyond allowance, fencing/barrier, landscaping, and utility relocation are excluded unless listed. [AI-drafted scope/exclusions would be reviewed by Contractor.]</p>
+ <h3>5. Permits, Survey &amp; Easements</h3><p>Placement relies on the survey supplied by Owner. Contractor will not build within utility easements.</p>
+ <h3>6. Warranty, Change Orders, Dispute Resolution</h3><p>[Fixed boilerplate from attorney-approved template — placeholder.]</p>
+ <p style="margin-top:30px">______________________ Contractor &nbsp;&nbsp;&nbsp; ______________________ Owner</p>`;}
+
+function takeoff(){const L=+tL.value,W=+tW.value,sh=+tS.value,dp=+tD.value,ov=+tO.value/100,pr=+tP.value;
+ const A=L*W,avg=(sh+dp)/2,V=A*avg,g=V*7.48,fl=W*Math.hypot(L,dp-sh),lw=2*L*avg,ew=W*sh+W*dp,shell=fl+lw+ew,rb=shell*3,rbo=rb*(1+ov),cy=shell/27;
+ const f=(n,d=1)=>n.toLocaleString(undefined,{maximumFractionDigits:d});
+ const rows=[['Surface area',`L×W = ${L}×${W}`,f(A)+' sf'],['Average depth',`(${sh}+${dp})/2`,f(avg,2)+' ft'],['Volume','area × avg depth',f(V)+' cu ft'],['Gallons','cu ft × 7.48',f(g,0)+' gal'],
+ ['Floor (sloped)',`W×√(L²+(deep−shallow)²)`,f(fl)+' sf'],['Long walls','2×L×avg depth',f(lw)+' sf'],['End walls','W×shallow + W×deep',f(ew)+' sf'],['Shell surface','floor + walls',f(shell)+' sf'],
+ ['Rebar (no overlap)','shell × 3 lf/sf',`${f(rb,0)} lf = ${Math.ceil(rb/20)} sticks`],['Rebar + overlap',`× (1+${tO.value}%)`,`${f(rbo,0)} lf = ${Math.ceil(rbo/20)} sticks`],['Gunite','shell × 1 ft ÷ 27',f(cy,2)+' cy'],['Gunite cost (example)',`cy × $${pr}`,$(cy*pr)]];
+ tk.innerHTML='<thead><tr><th>Item</th><th>Formula</th><th>Result</th></tr></thead><tbody>'+rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')+'</tbody>';}
+['tL','tW','tS','tD','tO','tP'].forEach(id=>document.getElementById(id).oninput=takeoff);
+// ===== Homeowner UI (reads ONLY K.record + K.pub retail rates; never K.priv) =====
+const hc=document.getElementById('ho'),hx=hc.getContext('2d');const HS=350/70;// px/ft over lot width, show front 84 ft of lot
+let hoStrokes=load(K.record,{}).design?.strokes||[];let hoF={...(load(K.record,{}).design?.features||{})};
+function drawHO(){hx.clearRect(0,0,hc.width,hc.height);const l={W:70,D:120,side:5,rear:8,house:5,es:10};const b=buildable(l);
+ hx.fillStyle='#eef6e8';hx.fillRect(0,0,hc.width,hc.height);hx.fillStyle='#ddd';hx.fillRect(10*HS,b.houseY*HS,50*HS,40*HS);hx.fillStyle='#555';hx.font='12px sans-serif';hx.fillText('YOUR HOUSE',28*HS,(b.houseY+6)*HS);
+ hx.fillStyle='rgba(29,138,78,.12)';hx.fillRect(b.x0*HS,b.y0*HS,(b.x1-b.x0)*HS,(b.y1-b.y0)*HS);hx.strokeStyle='#1d8a4e';hx.setLineDash([5,4]);hx.strokeRect(b.x0*HS,b.y0*HS,(b.x1-b.x0)*HS,(b.y1-b.y0)*HS);hx.setLineDash([]);
+ hx.fillStyle='#888';hx.fillText('back fence',4,12);hx.strokeStyle='#0e6ba8';hx.lineWidth=3;hoStrokes.forEach(st=>{hx.beginPath();st.forEach(([x,y],i)=>i?hx.lineTo(x*HS,y*HS):hx.moveTo(x*HS,y*HS));hx.stroke()});hoEstimate();}
+pen(hc,(x,y)=>[x/HS,y/HS],(t,c)=>{if(t==='start')hoStrokes.push(c);else hoEstimate()},drawHO);
+hoClear.onclick=()=>{hoStrokes=[];drawHO()};
+function chipsUI(){chips.innerHTML='';FEATS.forEach(([k,n])=>{const c=document.createElement('span');c.className='chip'+(hoF[k]?' on':'');c.textContent=n;c.onclick=()=>{hoF[k]=!hoF[k];chipsUI();hoEstimate()};chips.appendChild(c)})}
+function hoEstimate(){const pub=load(K.pub,{rates:{}}).rates;const c=cleanup(hoStrokes,{W:70,D:120,side:5,rear:8,house:5,es:10},'auto');
+ if(!c){hoEst.textContent='Draw a shape to see a price';hoEstNote.textContent='';return}
+ const q={area:c.area,perim:c.perim,vol_cy:Math.round(c.area*5.75/27),surf:Math.round(c.area+c.perim*4.75),deck:Math.round(c.perim*4+64),f:hoF};
+ // retail = qty × published RETAIL rate (server-computed). No cost or markup ever reaches this view.
+ const tot=SAMPLE_PRICEBOOK.reduce((s,p)=>s+p.qty(q)*(pub[p.code]||0),0);const lo=tot*.93,hi=tot*1.07;
+ hoEst.textContent=`${$(lo)} – ${$(hi)}`;hoEstNote.textContent=`About ${c.wid}′ × ${c.len}′${c.snapped?' (adjusted to fit your yard)':''}. Preliminary range; final price after builder review.`;}
+// NOTE: in production the homeowner bundle would not even contain SAMPLE_PRICEBOOK; qty formulas live server-side. Here unit costs (p.cost) are never read in homeowner code.
+hoSave.onclick=()=>{const r=writeRecord(r=>{r.design={strokes:hoStrokes,features:hoF,author:'homeowner',comment:hoComment.value,state:'submitted'}},'homeowner');hoStat.textContent=`✓ Sent! Your builder can see it now (version ${r.version}).`;};
+
+// ===== Sync banner (storage event = another tab/device; also polled on mode switch) =====
+let seen=load(K.record,{}).version;
+function checkSync(){const r=load(K.record,{});if(r.version>seen&&r.updatedBy==='homeowner'){syncBanner.style.display='block';syncBanner.innerHTML=`🔔 New design from the homeowner (record v${r.version}, ${new Date(r.updatedAt).toLocaleTimeString()})${r.design?.comment?` — “${r.design.comment}”`:''}. <button class="btn" id="sbLoad">Open it</button>`;
+ document.getElementById('sbLoad').onclick=()=>{strokes=JSON.parse(JSON.stringify(r.design.strokes));seen=r.version;syncBanner.style.display='none';go(1)}}}
+window.addEventListener('storage',()=>{checkSync();if(mode==='H'){hoEstimate()}});
+let mode='B';function setMode(m){mode=m;start.style.display='none';modes.style.display='flex';mB.className=m==='B'?'on':'';mH.className=m==='H'?'on':'';builder.style.display=m==='B'?'block':'none';homeowner.style.display=m==='H'?'block':'none';syncBanner.style.display='none';if(m==='B')checkSync();else{drawHO();chipsUI()}}
+mB.onclick=()=>setMode('B');mH.onclick=()=>setMode('H');
+reset.onclick=()=>{Object.values(K).forEach(k=>localStorage.removeItem(k));location.reload()};
+const qp=new URLSearchParams(location.search);go(+(qp.get('step')||0));if(qp.get('mode')||qp.get('step'))setMode(qp.get('mode')==='homeowner'?'H':'B');
+goHO.onclick=()=>setMode('H');goB.onclick=()=>setMode('B');home.onclick=()=>{builder.style.display='none';homeowner.style.display='none';modes.style.display='none';start.style.display='block'};
+window.__poolspan={setStrokes:s=>{strokes=s;hoStrokes=JSON.parse(JSON.stringify(s));},go,setMode};
+</script></body></html>
